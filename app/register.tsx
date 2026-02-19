@@ -13,18 +13,18 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 
 export default function RegisterScreen() {
-  const [name, setName] = useState("");
+  const [userName, setUserName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [password2, setConfirmPassword] = useState("");
 
   const handleRegister = async () => {
-    if (!name || !email || !password || !confirmPassword) {
+    if (!userName || !email || !password || !password2) {
       Alert.alert("Error", "Please fill all fields");
       return;
     }
 
-    if (password !== confirmPassword) {
+    if (password !== password2) {
       Alert.alert("Error", "Passwords do not match");
       return;
     }
@@ -52,8 +52,8 @@ export default function RegisterScreen() {
 
         <TextInput
           placeholder="Full Name"
-          value={name}
-          onChangeText={setName}
+          value={userName}
+          onChangeText={setUserName}
           style={styles.input}
         />
 
@@ -75,7 +75,7 @@ export default function RegisterScreen() {
 
         <TextInput
           placeholder="Confirm Password"
-          value={confirmPassword}
+          value={password2}
           onChangeText={setConfirmPassword}
           style={styles.input}
           secureTextEntry

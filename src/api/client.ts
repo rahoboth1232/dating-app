@@ -1,8 +1,16 @@
+// src/api/client.js
 import axios from "axios";
+import { useAuthStore } from "../store/authstore";
 
 export const api = axios.create({
-  baseURL: "http://192.168.1.10:8000/api", // use your local IP
-  headers: {
-    "Content-Type": "application/json",
-  },
+  baseURL: "http://127.0.0.1:8000/api", 
+ 
 });
+
+api.interceptors.request.use((config)=>{
+  const token  = useAuthStore.getState().token
+  if (token){
+    config.headers.Authorization = `Bearer ${token}`
+  }
+  return config
+})

@@ -1,6 +1,6 @@
-import { loginRequest } from "@/src/api/auth.api";
-import { router } from "expo-router";
 import React, { useState } from "react";
+
+import { router } from "expo-router";
 import {
   View,
   Text,
@@ -13,48 +13,39 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { loginRequest } from "@/src/api/auth.api";
+import {useAuthStore} from '../src/store/authstore'
 
 export default function LoginScreen() {
-  const [email, setEmail] = useState("");
+  const [user, setUser] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-  const validateEmail = (email: string) => {
-    const regex = /\S+@\S+\.\S+/;
-    return regex.test(email);
-  };
+
+  const login = useAuthStore((state)=>state.login)
 
   const handleLogin = async () => {
-    // 🔹 Basic Validation
-    if (!email || !password) {
-      Alert.alert("Validation Error", "Please enter email and password");
-      return;
-    }
-
-    if (!validateEmail(email)) {
-      Alert.alert("Validation Error", "Please enter a valid email address");
+    if (!user || !password) {
+      Alert.alert("Validation Error", "Please enter username and password");
       return;
     }
 
     try {
       setLoading(true);
+      const response = await loginRequest(user, password);
 
-      const response = await loginRequest(email, password);
+      console.log("Login success:", response);
+      await login(response.data.token)
 
-      // Success
-      console.log(response.data);
-      router.replace("/(tabs)/Home");
+      Alert.alert("Success", "Logged in successfully!");
+      router.replace("/profile"); // Navigate to Home
 
     } catch (error: any) {
-      // 🔹 Backend error handling
-      if (error.response) {
-        Alert.alert(
-          "Login Failed",
-          error.response.data?.message || "Invalid email or password"
-        );
-      } else {
-        Alert.alert("Error", "Something went wrong. Try again.");
-      }
+      console.log("Login error:", error.response?.data);
+      const message =
+        error.response?.data?.detail || "Invalid username or password";
+      Alert.alert("Login Failed", message);
     } finally {
       setLoading(false);
     }
@@ -70,25 +61,38 @@ export default function LoginScreen() {
         <Text style={styles.subtitle}>Find your perfect match</Text>
 
         <TextInput
-          placeholder="Email"
+          placeholder="Username"
           placeholderTextColor="#999"
-          value={email}
-          onChangeText={setEmail}
+          value={user}
+          onChangeText={setUser}
           style={styles.input}
-          keyboardType="email-address"
           autoCapitalize="none"
         />
 
-        <TextInput
-          placeholder="Password"
-          placeholderTextColor="#999"
-          value={password}
-          onChangeText={setPassword}
-          style={styles.input}
-          secureTextEntry
-        />
+        <View style={{ position: "relative" }}>
+          <TextInput
+            placeholder="Password"
+            placeholderTextColor="#999"
+            value={password}
+            onChangeText={setPassword}
+            style={styles.input}
+            secureTextEntry={!showPassword}
+          />
+          <TouchableOpacity
+            style={{ position: "absolute", right: 15, top: 15 }}
+            onPress={() => setShowPassword(!showPassword)}
+          >
+            <Text style={{ color: "#FF4D6D", fontWeight: "bold" }}>
+              {showPassword ? "Hide" : "Show"}
+            </Text>
+          </TouchableOpacity>
+        </View>
 
-        <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={loading}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleLogin}
+          disabled={loading}
+        >
           {loading ? (
             <ActivityIndicator color="#fff" />
           ) : (
@@ -107,15 +111,8 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
-  inner: {
-    flex: 1,
-    justifyContent: "center",
-    paddingHorizontal: 25,
-  },
+  container: { flex: 1, backgroundColor: "#fff" },
+  inner: { flex: 1, justifyContent: "center", paddingHorizontal: 25 },
   logo: {
     fontSize: 32,
     fontWeight: "bold",
@@ -123,12 +120,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 8,
   },
-  subtitle: {
-    fontSize: 16,
-    color: "#777",
-    textAlign: "center",
-    marginBottom: 40,
-  },
+  subtitle: { fontSize: 16, color: "#777", textAlign: "center", marginBottom: 40 },
   input: {
     height: 55,
     backgroundColor: "#F3F4F6",
@@ -145,14 +137,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 10,
   },
-  buttonText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "600",
-  },
-  signupText: {
-    textAlign: "center",
-    marginTop: 20,
-    color: "#555",
-  },
+  buttonText: { color: "#fff", fontSize: 18, fontWeight: "600" },
+  signupText: { textAlign: "center", marginTop: 20, color: "#555" },
 });
