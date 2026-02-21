@@ -14,7 +14,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { loginRequest } from "@/src/api/auth.api";
-import {useAuthStore} from '../src/store/authstore'
+import { useAuthStore } from '@/src/store/authStore'
 
 export default function LoginScreen() {
   const [user, setUser] = useState("");
@@ -23,7 +23,7 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
 
 
-  const login = useAuthStore((state)=>state.login)
+  const setAuth = useAuthStore((state) => state.setAuth)
 
   const handleLogin = async () => {
     if (!user || !password) {
@@ -35,16 +35,17 @@ export default function LoginScreen() {
       setLoading(true);
       const response = await loginRequest(user, password);
 
-      console.log("Login success:", response);
-      await login(response.data.token)
+      setAuth(
+        response.data.user,
+        response.data.token,
+        response.data.hasOnboarded ?? false
+      );
 
-      Alert.alert("Success", "Logged in successfully!");
-      router.replace("/profile"); // Navigate to Home
-
-    } catch (error: any) {
-      console.log("Login error:", error.response?.data);
+      router.replace("/(tabs)/Home");
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { detail?: string } } };
       const message =
-        error.response?.data?.detail || "Invalid username or password";
+        err.response?.data?.detail || "Invalid username or password";
       Alert.alert("Login Failed", message);
     } finally {
       setLoading(false);
@@ -100,7 +101,7 @@ export default function LoginScreen() {
           )}
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => router.push("/register")}>
+        <TouchableOpacity onPress={() => router.push("/(auth)/signup-email")}>
           <Text style={styles.signupText}>
             Don't have an account? Sign Up
           </Text>

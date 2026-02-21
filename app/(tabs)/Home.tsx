@@ -11,8 +11,8 @@ import {
   Dimensions,
   FlatList,
   Platform,
-  Button,
 } from "react-native";
+import { useRouter } from "expo-router";
 const { width, height } = Dimensions.get("window");
 const PROFILES = [
 
@@ -289,16 +289,19 @@ function AboutSection() {
   );
 }
 
-function ProfilesSection({navigation}) {
+function ProfilesSection() {
+  const router = useRouter();
   return (
     <View style={styles.profilesSection}>
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionChip}>DISCOVER</Text>
         <Text style={styles.sectionTitle}>People Near You</Text>
-        <Button
-        title="Go to Profile"
-        onPress={() => navigation.navigate('Profile')} // Navigate to the Profile screen
-      />
+        <TouchableOpacity
+          style={{ backgroundColor: '#ff4d6d', paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8, marginTop: 8 }}
+          onPress={() => router.push('/Profile')}
+        >
+          <Text style={{ color: '#fff', fontWeight: '700', textAlign: 'center' }}>Go to Profile</Text>
+        </TouchableOpacity>
       </View>
 
       <FlatList

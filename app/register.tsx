@@ -31,7 +31,7 @@ export default function RegisterScreen() {
 
     try {
       // TODO: connect to backend
-      console.log({ name, email, password });
+      console.log({ userName, email, password });
 
       // After successful register
       router.replace("/(tabs)/Home");
